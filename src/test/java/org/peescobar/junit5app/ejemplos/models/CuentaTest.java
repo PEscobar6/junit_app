@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CuentaTest {
     @Test
-    void testNameAccoun(){
+    void testNameAccoun() {
         Cuenta cuenta = new Cuenta("Pablo", new BigDecimal("1000.12345"));
 
         String realName = cuenta.getPersona();
@@ -20,7 +20,7 @@ class CuentaTest {
     }
 
     @Test
-    void testAmountAccount(){
+    void testAmountAccount() {
         Cuenta cuenta = new Cuenta("Pablo", new BigDecimal("1000.12345"));
         assertNotNull(cuenta.getSaldo());
         assertEquals(1000.12345, cuenta.getSaldo().doubleValue());
@@ -58,7 +58,7 @@ class CuentaTest {
     @Test
     void testInsufficientMoneyExceptionAccount() {
         Cuenta cuenta = new Cuenta("Pablo Escobar ", new BigDecimal("1000.12345"));
-        Exception exception = assertThrows(InsufficientMoneyException.class, ()->{
+        Exception exception = assertThrows(InsufficientMoneyException.class, () -> {
             cuenta.debit(new BigDecimal(1100));
         });
         String realException = exception.getMessage();
@@ -77,5 +77,56 @@ class CuentaTest {
         bank.transferMoney(cuentaUno, cuentaDos, new BigDecimal("500"));
         assertEquals("2000", cuentaUno.getSaldo().toPlainString());
         assertEquals("2000.8989", cuentaDos.getSaldo().toPlainString());
+    }
+
+    @Test
+    void testRelationBankAccounts() {
+        Cuenta cuentaUno = new Cuenta("John Doe", new BigDecimal("2500"));
+        Cuenta cuentaDos = new Cuenta("Pablo", new BigDecimal("1500.8989"));
+
+        Bank bank = new Bank();
+        bank.addAccount(cuentaUno);
+        bank.addAccount(cuentaDos);
+
+        bank.setName("Banco de Bogotá");
+        bank.transferMoney(cuentaUno, cuentaDos, new BigDecimal("500"));
+        assertEquals("2000", cuentaUno.getSaldo().toPlainString());
+        assertEquals("2000.8989", cuentaDos.getSaldo().toPlainString());
+
+        assertEquals(2, bank.getAccounts().size());
+        assertEquals("Banco de Bogotá", cuentaUno.getBank().getName());
+        assertEquals("Pablo", bank.getAccounts().stream()
+                .filter(c -> c.getPersona().equals("Pablo"))
+                .findFirst()
+                .get()
+                .getPersona()
+        );
+    }
+
+    @Test
+    void testRelationBankAccountsIsPresent() {
+        Cuenta cuentaUno = new Cuenta("John Doe", new BigDecimal("2500"));
+        Cuenta cuentaDos = new Cuenta("Pablo Escobar", new BigDecimal("1500.8989"));
+
+        Bank bank = new Bank();
+        bank.addAccount(cuentaUno);
+        bank.addAccount(cuentaDos);
+
+        bank.setName("Banco de Bogotá");
+        bank.transferMoney(cuentaUno, cuentaDos, new BigDecimal("500"));
+
+        assertAll(
+                () ->
+                        assertEquals("2000", cuentaUno.getSaldo().toPlainString()),
+                () ->
+                        assertEquals("2000.8989", cuentaDos.getSaldo().toPlainString()),
+                () ->
+                        assertEquals(2, bank.getAccounts().size()),
+                () ->
+                        assertEquals("Banco de Bogotá", cuentaUno.getBank().getName()),
+                () ->
+                        assertTrue(bank.getAccounts().stream()
+                                .anyMatch(c -> c.getPersona().equals("Pablo Escobar")))
+        );
     }
 }

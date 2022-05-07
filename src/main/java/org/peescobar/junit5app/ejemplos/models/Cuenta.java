@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 public class Cuenta {
     private String persona;
     private BigDecimal saldo;
+    private Bank bank;
 
     public Cuenta(String persona, BigDecimal saldo) {
         this.persona = persona;
@@ -36,6 +37,14 @@ public class Cuenta {
         }else{
             this.saldo = newAmount; 
         }
+    }
+
+    public Bank getBank() {
+        return bank;
+    }
+
+    public void setBank(Bank bank) {
+        this.bank = bank;
     }
 
     public void credit(BigDecimal amount){
